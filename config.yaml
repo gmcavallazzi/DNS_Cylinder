@@ -1,0 +1,44 @@
+# Configuration for Channel Flow Simulation
+
+# Grid parameters
+grid:
+  nx: 320               # Number of cells in x-direction
+  ny: 256               # Number of cells in y-direction
+  lx: 12.0            # Domain length in x-direction (pi)
+  ly: 3.2               # Domain height in y-direction
+  stretch_factor: 1.0   # Grid stretching factor for y-direction
+  plot_grid: true       # Whether to plot the grid distribution
+
+# Flow parameters
+flow:
+  reynolds: 150        # Reynolds number
+  u_bulk: 1.0           # Target bulk velocity
+
+# Simulation parameters
+simulation:
+  cfl: 0.4              # CFL number for timestep calculation
+  t_end: 60.0           # End time for simulation
+  save_interval: 5.0    # Interval for saving results
+  print_interval: 30   # Interval for printing statistics
+  output_dir: "results"  # Output directory
+  safety_factor: 0.5    # Safety factor for timestep
+  max_divergence: 1.0   # Maximum allowed divergence before aborting
+
+# Perturbation parameters
+perturbations:
+  amplitude: 0.5            # Initial perturbation amplitude
+  injection_frequency: 1.5   # Perturbation injection frequency
+  injection_amplitude: 0.2   # Injection perturbation amplitude
+  max_injection_time: 0.0    # Maximum time to inject perturbations
+
+# Cylinder obstacle parameters (optional)
+cylinder:
+  enabled: true        # Whether to include a cylinder obstacle
+  center_x_ratio: 0.2  # Cylinder center x-position as ratio of domain length
+  center_y_ratio: 0.5   # Cylinder center y-position as ratio of domain height
+  radius_ratio: 0.06   # Cylinder radius as ratio of domain height
+  analysis_start_time: 20.0 # Time to start vortex shedding analysis (skip initial transient)
+
+# Boundary conditions
+bc: 
+  kind: "inletoutlet"     # Other options: "periodic"

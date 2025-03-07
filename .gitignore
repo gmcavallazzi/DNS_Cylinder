@@ -1,0 +1,27 @@
+# Simulation results
+results/
+*.npz
+*.png
+*.jpg
+*.gif
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Miscellaneous
+.DS_Store
+*.log
