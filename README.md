@@ -1,172 +1,182 @@
-# Cylinder Flow Simulation with Adams-Bashforth Integration
+# Computational Fluid Dynamics (CFD) Solver
 
-## Overview
-This project implements a high-performance computational fluid dynamics (CFD) simulation of incompressible flow past a cylindrical obstacle using the fractional step method with Adams-Bashforth time integration.
+A high-performance CFD solver for simulating channel flows and vortex shedding behind cylinders, using the fractional step method and Adams-Bashforth time integration.
 
-## Key Features
-- 2D incompressible flow solver
-- Adams-Bashforth 2nd order time integration
-- Flexible boundary conditions (periodic/inlet-outlet)
-- Adaptive time-stepping 
-- Vortex shedding analysis
-- Detailed force and flow field visualization
+## Features
 
-## Physical Model
-- Solves Navier-Stokes equations for incompressible flow
-- Uses staggered grid discretization
-- Supports various Reynolds numbers
-- Optional cylindrical obstacle simulation
-
-## Performance Optimizations
-- JIT compilation with Numba
-- Vectorized and parallelized computational kernels
-- Efficient memory management
-- Grid stretching for enhanced near-wall resolution
-
-## Dependencies
-- NumPy
-- Numba
-- Matplotlib
-- SciPy (optional, for advanced analysis)
-- PyYAML
-
-## Simulation Configuration
-Configuration is managed through a `config.yaml` file allowing customization of:
-- Grid parameters
-- Flow conditions
-- Simulation settings
-- Boundary conditions
-- Perturbation injection
-- Cylinder obstacle parameters
-
-## Key Modules
-- `main.py`: Primary simulation driver
-- `solver.py`: Core numerical methods
-- `adams_bashforth.py`: Time integration scheme
-- `cylinder_visualization.py`: Flow field analysis
-- `forces_analysis.py`: Force coefficient calculations
-- `turbulent_helpers.py`: Initial condition and perturbation generation
-
-## Typical Workflow
-1. Configure simulation parameters in `config.yaml`
-2. Run `main.py`
-3. Analyze generated results in `results/` directory
-
-## Visualization Outputs
-- Velocity fields
-- Vorticity contours
-- Force coefficient histories
-- Pressure distributions
-- Space-time diagrams
-
-## Example Configuration Scenarios
-- Channel flow simulation
-- Flow past a cylinder at different Reynolds numbers
-- Turbulence transition studies
-
-## Performance Metrics Tracked
-- Bulk velocity
-- Pressure gradients
-- Wall shear stresses
-- Computational efficiency
-- Numerical stability
+- Incompressible Navier-Stokes solver on a staggered grid
+- Parallel computation with Numba JIT compilation
+- Adaptive time-stepping based on CFL condition
+- Multiple boundary condition options
+- Simulation of flow around a cylinder with vortex shedding analysis
+- Force (drag/lift) calculation for immersed objects
+- Automatic visualization of results
 
 ## Numerical Methods
-- Fractional step method
-- Adams-Bashforth time integration
-- Finite difference discretization
-- Pressure Poisson solver with SOR relaxation
 
-## Analysis Capabilities
-- Vortex shedding frequency
-- Drag and lift coefficient calculation
-- Flow field statistical analysis
-- Strouhal number computation
+### Governing Equations
 
-## Usage
+The code solves the incompressible Navier-Stokes equations:
 
-### Basic Simulation Execution
-```bash
-# Run simulation with default configuration
-python main.py
+$$\frac{\partial \mathbf{u}}{\partial t} + \mathbf{u} \cdot \nabla \mathbf{u} = -\frac{1}{\rho}\nabla p + \nu \nabla^2 \mathbf{u}$$
 
-# Specify a custom configuration file
-python main.py --config custom_config.yaml
+$$\nabla \cdot \mathbf{u} = 0$$
 
-# Override output directory
-python main.py --output custom_results
-```
+Where:
+- $\mathbf{u}$ is the velocity vector
+- $p$ is pressure
+- $\rho$ is density
+- $\nu$ is kinematic viscosity
 
-### Configuration Options
-The `config.yaml` file allows detailed customization of the simulation:
+### Discretization
 
-#### Grid Configuration
+The solver uses:
+- Staggered grid (MAC scheme) with pressure at cell centers and velocities at cell faces
+- Finite difference discretization with second-order accuracy in space
+- Adams-Bashforth second-order method for time integration
+- Upwind scheme for convective terms
+- Central differencing for diffusive terms
+
+### Fractional Step Method
+
+The time integration follows the fractional step procedure:
+
+1. **Predictor Step**: Compute an intermediate velocity field $\mathbf{u}^*$ without enforcing incompressibility
+   $\mathbf{u}^* = \mathbf{u}^n + \Delta t \left( \frac{3}{2}\mathbf{F}^n - \frac{1}{2}\mathbf{F}^{n-1} \right)$
+   where $\mathbf{F} = -(\mathbf{u} \cdot \nabla)\mathbf{u} + \nu \nabla^2 \mathbf{u}$ includes convective and diffusive terms
+
+2. **Pressure Poisson Equation**: Solve for pressure to enforce incompressibility
+   $\nabla^2 p^{n+1} = \frac{\rho}{\Delta t} \nabla \cdot \mathbf{u}^*$
+
+3. **Corrector Step**: Update velocity field to be divergence-free
+   $\mathbf{u}^{n+1} = \mathbf{u}^* - \frac{\Delta t}{\rho} \nabla p^{n+1}$
+
+4. **Apply Boundary Conditions**: Update ghost cells to enforce desired boundary conditions
+
+### Grid System
+
+The code uses a stretched grid in the y-direction to better resolve near-wall regions:
+- Hyperbolic tangent stretching function for y-coordinates
+- Uniform grid spacing in the x-direction
+
+## Code Structure
+
+- `main.py`: Main simulation driver
+- `solver.py`: Core solver functions (pressure projection, velocity correction)
+- `adams_bashforth.py`: Time integration using Adams-Bashforth scheme
+- `turbulent_helpers.py`: Functions to add perturbations and vortices
+- `utils.py`: Utility functions for data analysis and statistics
+- `cylinder_visualization.py`: Flow visualization around cylinders
+- `forces_analysis.py`: Calculation of forces and pressure distribution
+- `config.yaml`: Configuration file for simulation parameters
+
+## Key Functions
+
+- `run_simulation_ab2()`: Main simulation function
+- `fractional_step_ab2()`: Time stepping with Adams-Bashforth
+- `solve_pressure_poisson()`: Solves pressure equation
+- `velocity_correction()`: Projects velocity field to be divergence-free
+- `calculate_forces_cylinder()`: Calculates drag and lift forces
+- `analyze_vortex_shedding()`: Analyzes vortex shedding frequency and Strouhal number
+
+## Setup Instructions
+
+### Environment Setup
+
+1. Create a new conda environment:
+   ```bash
+   conda create -n cfd python=3.10
+   conda activate cfd
+   ```
+
+2. Install required packages:
+   ```bash
+   conda install numpy matplotlib pyyaml scipy
+   conda install -c conda-forge numba
+   ```
+
+### Running a Simulation
+
+1. Configure the simulation by editing `config.yaml`. Key parameters include:
+   - Grid resolution (`nx`, `ny`)
+   - Domain size (`lx`, `ly`)
+   - Reynolds number
+   - Boundary conditions
+   - Cylinder parameters (if applicable)
+
+2. Run the simulation:
+   ```bash
+   python main.py --config config.yaml
+   ```
+
+3. With custom output directory:
+   ```bash
+   python main.py --config config.yaml --output custom_results
+   ```
+
+## Example Configurations
+
+### Channel Flow
+
 ```yaml
 grid:
-  nx: 320               # Number of cells in x-direction
-  ny: 256               # Number of cells in y-direction
-  lx: 12.0              # Domain length in x-direction
-  ly: 3.2               # Domain height in y-direction
-  stretch_factor: 1.0   # Grid stretching factor for y-direction
-  plot_grid: true       # Visualize grid distribution
-```
+  nx: 128
+  ny: 64
+  lx: 6.28
+  ly: 2.0
+  stretch_factor: 1.5
 
-#### Flow Parameters
-```yaml
 flow:
-  reynolds: 150         # Reynolds number
-  u_bulk: 1.0           # Target bulk velocity
-```
+  reynolds: 180
+  u_bulk: 1.0
 
-#### Simulation Settings
-```yaml
-simulation:
-  cfl: 0.4              # CFL number for timestep calculation
-  t_end: 60.0           # Total simulation time
-  save_interval: 5.0    # Interval for saving results
-  output_dir: "results" # Output directory
-```
+bc:
+  kind: "periodic"
 
-#### Cylinder Obstacle Configuration
-```yaml
 cylinder:
-  enabled: true         # Enable cylinder obstacle
-  center_x_ratio: 0.2   # Cylinder x-position (ratio of domain length)
-  center_y_ratio: 0.5   # Cylinder y-position (ratio of domain height)
-  radius_ratio: 0.06    # Cylinder radius
+  enabled: false
 ```
 
-### Performance and Debugging
-- Monitor console output for simulation statistics
-- Check `results/` directory for:
-  - Velocity field visualizations
-  - Force coefficient histories
-  - Vorticity contours
-  - Diagnostic plots
+### Cylinder Flow
 
-### Typical Workflow
-1. Adjust `config.yaml` to match desired simulation parameters
-2. Run simulation
-3. Analyze output files in `results/` directory
-4. Modify configuration for different flow conditions
+```yaml
+grid:
+  nx: 320
+  ny: 256
+  lx: 12.0
+  ly: 3.2
 
-### Advanced Usage
-```bash
-# For help and additional options
-python main.py --help
+flow:
+  reynolds: 150
+  u_bulk: 1.0
+
+bc:
+  kind: "inletoutlet"
+
+cylinder:
+  enabled: true
+  center_x_ratio: 0.2
+  center_y_ratio: 0.5
+  radius_ratio: 0.06
 ```
 
-### Recommended Environments
-- Python 3.12+
-- Virtual environment recommended
-- Install dependencies: `pip install -r requirements.txt`
+## Output and Visualization
 
-### Troubleshooting
-- Ensure all dependencies are installed
-- Check console output for numerical instability warnings
-- Adjust CFL number or grid resolution if simulation diverges
+Results are saved in the specified output directory:
+- PNG images of the flow field
+- Force coefficient histories
+- Vorticity space-time diagrams
+- Metrics stored in NPZ files for further analysis
 
+## Performance Optimization
+
+The code uses several optimization techniques:
+- Numba JIT compilation for performance-critical functions
+- Parallel execution for key computational loops
+- Adaptive time-stepping to maintain stability
 
 ## References
-- Ferziger & Peric, Computational Methods for Fluid Dynamics
-- Patankar, Numerical Heat Transfer and Fluid Flow
+
+1. Chorin, A. J. (1968). Numerical solution of the Navier-Stokes equations.
+2. Kim, J., & Moin, P. (1985). Application of a fractional-step method to incompressible Navier-Stokes equations.
+3. Williamson, C. H. K. (1996). Vortex dynamics in the cylinder wake.
