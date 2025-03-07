@@ -1,4 +1,4 @@
-# Computational Fluid Dynamics (CFD) Solver
+# PyVortexDNS: High-Fidelity Cylinder Flow Simulator
 
 A high-performance CFD solver for simulating channel flows and vortex shedding behind cylinders, using the fractional step method and Adams-Bashforth time integration.
 
