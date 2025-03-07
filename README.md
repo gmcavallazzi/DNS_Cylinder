@@ -42,7 +42,7 @@ The solver uses:
 The time integration follows the fractional step procedure:
 
 1. **Predictor Step**:
-   $$ \mathbf{u}^* = \mathbf{u}^n + \Delta t \left( \frac{3}{2}\mathbf{F}^n - \frac{1}{2}\mathbf{F}^{n-1} \right) $$
+   $ \mathbf{u}^* = \mathbf{u}^n + \Delta t \left( \frac{3}{2}\mathbf{F}^n - \frac{1}{2}\mathbf{F}^{n-1} \right) $
 
 2. **Pressure Poisson Equation**:
    $$ \nabla^2 p^{n+1} = \frac{\rho}{\Delta t} \nabla \cdot \mathbf{u}^* $$
