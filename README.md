@@ -41,8 +41,9 @@ The solver uses:
 
 The time integration follows the fractional step procedure:
 
-1. **Predictor Step**: Compute an intermediate velocity field $\mathbf{u}^*$ without enforcing incompressibility
-   $\mathbf{u}^* = \mathbf{u}^n + \Delta t \left( \frac{3}{2}\mathbf{F}^n - \frac{1}{2}\mathbf{F}^{n-1} \right)$
+1. **Predictor Step**: Compute an intermediate velocity field $\mathbf{u}^*$ without enforcing 
+
+   $$\mathbf{u}^* = \mathbf{u}^n + \Delta t \left( \frac{3}{2}\mathbf{F}^n - \frac{1}{2}\mathbf{F}^{n-1} \right)$$
    where $\mathbf{F} = -(\mathbf{u} \cdot \nabla)\mathbf{u} + \nu \nabla^2 \mathbf{u}$ includes convective and diffusive terms
 
 2. **Pressure Poisson Equation**: Solve for pressure to enforce incompressibility
@@ -51,7 +52,8 @@ The time integration follows the fractional step procedure:
    ```
 
 3. **Corrector Step**: Update velocity field to be divergence-free
-   $\mathbf{u}^{n+1} = \mathbf{u}^* - \frac{\Delta t}{\rho} \nabla p^{n+1}$
+
+   $$\mathbf{u}^{n+1} = \mathbf{u}^* - \frac{\Delta t}{\rho} \nabla p^{n+1}$$
 
 4. **Apply Boundary Conditions**: Update ghost cells to enforce desired boundary conditions
 
