@@ -47,9 +47,8 @@ The time integration follows the fractional step procedure:
    where $\mathbf{F} = -(\mathbf{u} \cdot \nabla)\mathbf{u} + \nu \nabla^2 \mathbf{u}$ includes convective and diffusive terms
 
 2. **Pressure Poisson Equation**: Solve for pressure to enforce incompressibility
-   ```math
-   \nabla^2 p^{n+1} = \frac{\rho}{\Delta t} \nabla \cdot \mathbf{u}^*
-   ```
+   
+   $$\nabla^2 p^{n+1} = \frac{\rho}{\Delta t} \nabla \cdot \mathbf{u}^*$$
 
 3. **Corrector Step**: Update velocity field to be divergence-free
 
